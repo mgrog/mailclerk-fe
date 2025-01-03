@@ -1,19 +1,20 @@
-import { redirect } from 'next/navigation';
-import { Settings } from './settings';
-import { getTeamForUser, getUser } from '@/lib/db/queries';
+import { getUser } from "@/lib/db/queries";
+
+// import { useUser } from "@/lib/auth";
 
 export default async function SettingsPage() {
+  // const { user } = useUser();
+
   const user = await getUser();
 
-  if (!user) {
-    redirect('/sign-in');
-  }
+  // if (!user) {
+  //   redirect("/sign-in");
+  // }
 
-  const teamData = await getTeamForUser(user.id);
-
-  if (!teamData) {
-    throw new Error('Team not found');
-  }
-
-  return <Settings teamData={teamData} />;
+  return (
+    <div>
+      <h1>Dashboard!</h1>
+      <pre>{JSON.stringify(user, null, 2)}</pre>
+    </div>
+  );
 }

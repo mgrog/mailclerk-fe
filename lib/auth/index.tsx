@@ -1,18 +1,13 @@
-'use client';
+"use client";
 
-import {
-  createContext,
-  useContext,
-  ReactNode,
-  useState,
-  useEffect,
-} from 'react';
-import { use } from 'react';
-import { User } from '@/lib/db/schema';
+import { User } from "@/lib/db/schema";
+import { Selectable } from "kysely";
+import { createContext, useContext, ReactNode, useState, useEffect } from "react";
+import { use } from "react";
 
 type UserContextType = {
-  user: User | null;
-  setUser: (user: User | null) => void;
+  user: Selectable<User> | null;
+  setUser: (user: Selectable<User> | null) => void;
 };
 
 const UserContext = createContext<UserContextType | null>(null);
@@ -20,7 +15,7 @@ const UserContext = createContext<UserContextType | null>(null);
 export function useUser(): UserContextType {
   let context = useContext(UserContext);
   if (context === null) {
-    throw new Error('useUser must be used within a UserProvider');
+    throw new Error("useUser must be used within a UserProvider");
   }
   return context;
 }
@@ -30,18 +25,14 @@ export function UserProvider({
   userPromise,
 }: {
   children: ReactNode;
-  userPromise: Promise<User | null>;
+  userPromise: Promise<Selectable<User> | null>;
 }) {
   let initialUser = use(userPromise);
-  let [user, setUser] = useState<User | null>(initialUser);
+  let [user, setUser] = useState<Selectable<User> | null>(initialUser);
 
   useEffect(() => {
     setUser(initialUser);
   }, [initialUser]);
 
-  return (
-    <UserContext.Provider value={{ user, setUser }}>
-      {children}
-    </UserContext.Provider>
-  );
+  return <UserContext.Provider value={{ user, setUser }}>{children}</UserContext.Provider>;
 }
