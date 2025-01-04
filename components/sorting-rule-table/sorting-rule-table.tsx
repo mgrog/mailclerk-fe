@@ -27,6 +27,7 @@ import {
   RemoveRuleActionState,
   RemoveRuleForm,
 } from "@/components/sorting-rule-table/sorting-rule-forms/remove-rule";
+import { useAutoAnimate } from "@formkit/auto-animate/react";
 
 interface SortingRuleTableProps {
   rules: {
@@ -39,6 +40,8 @@ export function SortingRuleTable({ rules }: SortingRuleTableProps) {
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [selectedToRemove, setSelectedToRemove] = useState<CustomRule | DefaultRule | null>(null);
   const isMobile = useMediaQuery("(max-width: 767px)");
+  const [tbody1] = useAutoAnimate();
+  const [tbody2] = useAutoAnimate();
   const onActionComplete = (
     state: CustomRuleActionState | PredefinedRuleActionState | RemoveRuleActionState,
   ) => {
@@ -67,7 +70,7 @@ export function SortingRuleTable({ rules }: SortingRuleTableProps) {
   return (
     <>
       <div className="relative">
-        <div tabIndex={0} className="collapse">
+        <div tabIndex={0} className="collapse bg-white">
           <input type="checkbox" defaultChecked className="peer" />
           <div className="collapse-title text-sm pe-8 items-center justify-between hidden peer-checked:flex">
             Default Rules ({rules.default.length}) <ChevronUpIcon className={chevronClass} />
@@ -77,7 +80,7 @@ export function SortingRuleTable({ rules }: SortingRuleTableProps) {
           </div>
           <div className="collapse-content">
             <table className="border-separate border-spacing-y-4 -my-4 w-full">
-              <tbody>
+              <tbody ref={tbody1}>
                 {rules.default.map((rule) => (
                   <tr key={`default-${rule.name}`} className="bg-white">
                     <td className="pl-8 py-2 border-l border-y border-gray-200 text-sm font-medium">
@@ -101,7 +104,7 @@ export function SortingRuleTable({ rules }: SortingRuleTableProps) {
           </div>
         </div>
 
-        <div tabIndex={1} className="collapse">
+        <div tabIndex={1} className="collapse bg-white">
           <input type="checkbox" defaultChecked className="peer" />
           <div className="collapse-title text-sm pe-8 items-center justify-between hidden peer-checked:flex">
             Custom Rules ({rules.custom.length}) <ChevronUpIcon className={chevronClass} />
@@ -111,7 +114,7 @@ export function SortingRuleTable({ rules }: SortingRuleTableProps) {
           </div>
           <div className="collapse-content">
             <table className="border-separate border-spacing-y-4 -my-4 w-full">
-              <tbody>
+              <tbody ref={tbody2}>
                 {rules.custom.map((rule) => (
                   <tr key={`${rule.id}`} className="bg-white">
                     <td className="pl-8 py-3 border-l border-y border-gray-200 text-sm font-medium">
