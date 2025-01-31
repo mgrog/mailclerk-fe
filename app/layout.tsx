@@ -1,6 +1,6 @@
 import "./globals.css";
 import type { Metadata, Viewport } from "next";
-import { Manrope } from "next/font/google";
+import { Manrope, Open_Sans } from "next/font/google";
 
 export const metadata: Metadata = {
   title: "Next.js SaaS Starter",
@@ -12,11 +12,12 @@ export const viewport: Viewport = {
 };
 
 const manrope = Manrope({ subsets: ["latin"], variable: "--font-manrope" });
+const openSans = Open_Sans({ subsets: ["latin"], variable: "--font-open-sans" });
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`bg-base-100 text-black ${manrope.variable}`}>
-      <body className="min-h-[100dvh] bg-base-100">{children}</body>
+    <html lang="en" className={`bg-base-100 text-black ${manrope.variable} ${openSans.variable}`}>
+      <body className="bg-base-100">{children}</body>
     </html>
   );
 }

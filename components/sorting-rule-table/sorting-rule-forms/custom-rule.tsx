@@ -67,7 +67,7 @@ export function CustomSortingRuleCreateForm({ onComplete }: CustomSortingRuleCre
         </div>
         <div>
           <Label htmlFor="rule-mail-label">Email Label</Label>
-          <Input id="rule-mail-label" name="label" type="text" required />
+          <Input id="rule-mail-label" name="mailLabel" type="text" required />
         </div>
         <div>
           <Label htmlFor="rule-summary">Email Summary</Label>

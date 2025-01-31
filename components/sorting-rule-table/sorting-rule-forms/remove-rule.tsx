@@ -39,16 +39,16 @@ export function RemoveRuleForm({ rule, onComplete, onCancel }: RemoveRuleFormPro
     onComplete(removeCustomRuleState);
   }, [removeCustomRuleState]);
 
-  const ruleName = getRuleName(rule);
+  const ruleName = rule?.name ?? "";
 
   const handleFormSubmit = () => {
     if (!rule) {
       throw new Error("Rule to remove is not selected!");
     }
 
-    if ("category" in rule) {
+    if ("id" in rule) {
       const formData = new FormData();
-      formData.append("categoryName", rule.category);
+      formData.append("ruleId", rule.id.toString());
       startTransition(() => {
         return removeCustomRuleAction(formData);
       });
@@ -93,13 +93,6 @@ export function RemoveRuleForm({ rule, onComplete, onCancel }: RemoveRuleFormPro
       </div>
     </div>
   );
-}
-
-function getRuleName(rule: CustomRule | DefaultRule | null) {
-  if (!rule) {
-    return "";
-  }
-  return "name" in rule ? rule.name : rule.category;
 }
 
 export type { ActionState as RemoveRuleActionState };

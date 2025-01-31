@@ -2,6 +2,7 @@
 
 import { db } from "@/lib/db/database";
 import { DEFAULT_EMAIL_RULES } from "@/lib/constants";
+import { AutoCleanupSetting } from "@/lib/db/schema";
 
 export async function getCurrentUserEnabledEmailRuleCount(userId: number): Promise<number> {
   let enabledDefaultCount = await db
@@ -21,19 +22,19 @@ export async function getCurrentUserEnabledEmailRuleCount(userId: number): Promi
 }
 
 export async function getUserDefaultOverrides(userId: number) {
-  const overrides = await db
+  const disabledOverrides = await db
     .selectFrom("defaultEmailRuleOverride")
     .selectAll()
     .where("userId", "=", userId)
+    .where("isDisabled", "=", true)
     .execute();
 
-  const defaultRules = DEFAULT_EMAIL_RULES.filter(
-    (rule) =>
-      !overrides.some((override) => {
-        const label = rule.label.replace(" ", "_");
-        return override.category === label && override.isDisabled;
-      }),
-  );
+  const disabledOverridesSet = new Set(disabledOverrides.map((override) => override.category));
+
+  const defaultRules = DEFAULT_EMAIL_RULES.filter((rule) => {
+    const label = rule.label.replace(" ", "_");
+    return !disabledOverridesSet.has(label);
+  });
 
   return defaultRules;
 }

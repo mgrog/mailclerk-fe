@@ -10,15 +10,13 @@ export default async function SortingRules() {
     getUserCustomRules(user.id),
   ]);
 
-  const rulesNum = defaultRules.length + customRules.length;
-
   return (
-    <div className="max-w-2xl mx-auto pb-20">
-      <div className="flex justify-between items-baseline px-6">
-        <div />
-        <h1 className="py-12 text-2xl font-semibold">Sorting Rules</h1>
-        <span className="">{rulesNum} / 20</span>
-      </div>
+    <div className="flex justify-center bg-white pt-4 pb-20 px-0 md:px-12">
+      {/* <div className="flex justify-end items-baseline pt-4 pb-2 px-6"> */}
+      {/* <div />
+        <h1 className="py-12 text-2xl font-semibold">Sorting Rules</h1> */}
+      {/* <span className="">{rulesNum} / 20</span> */}
+      {/* </div> */}
       <SortingRuleTable rules={{ default: defaultRules, custom: customRules }} />
     </div>
   );

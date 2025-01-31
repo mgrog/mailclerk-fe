@@ -21,21 +21,21 @@ export type Timestamp = ColumnType<Date, Date | string, Date | string>;
 
 export interface AutoCleanupSetting {
   afterDaysOld: Generated<number>;
-  category: string;
   cleanupAction: Generated<CleanupAction>;
   createdAt: Generated<Timestamp>;
   id: Generated<number>;
-  isDisabled: Generated<boolean>;
+  mailLabel: string;
   updatedAt: Generated<Timestamp>;
   userId: number;
 }
 
 export interface CustomEmailRule {
   associatedEmailClientCategory: Associatedemailclientcategory | null;
-  category: string;
   createdAt: Generated<Timestamp>;
   description: string;
   id: Generated<number>;
+  mailLabel: string;
+  name: string;
   promptContent: string;
   updatedAt: Generated<Timestamp>;
   userId: number;

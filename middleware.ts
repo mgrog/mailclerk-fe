@@ -4,7 +4,7 @@ import { setSession, verifyToken } from "@/lib/auth/session";
 import setCookie from "set-cookie-parser";
 
 const REDIRECT_ROUTES = ["/sign-in", "/confirm-connection"];
-const protectedRoutes = "/dashboard";
+const protectedRoutes = "/app";
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -14,7 +14,7 @@ export async function middleware(request: NextRequest) {
   // TODO: Try this again with same domain
   if (REDIRECT_ROUTES.some((p) => pathname.startsWith(p))) {
     if (pathname.startsWith("/sign-in") && cookieVerified) {
-      return NextResponse.redirect(new URL("/dashboard", request.url));
+      return NextResponse.redirect(new URL("/app", request.url));
     }
 
     // Get the session id from the url
@@ -39,7 +39,7 @@ export async function middleware(request: NextRequest) {
           await verifyToken(sessionCookie.value);
           await setSession(sessionCookie);
           if (pathname.startsWith("/sign-in")) {
-            return NextResponse.redirect(new URL("/dashboard", request.url));
+            return NextResponse.redirect(new URL("/app", request.url));
           }
         }
       } catch (error) {

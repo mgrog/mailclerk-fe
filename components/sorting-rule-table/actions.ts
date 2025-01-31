@@ -21,6 +21,7 @@ import { z } from "zod";
 
 const createCustomRuleSchema = z.object({
   name: z.string(),
+  mailLabel: z.string(),
   summary: z.string().max(50),
   description: z.string().max(500),
 });
@@ -35,9 +36,10 @@ export const createCustomRule = validatedActionWithUser(
         .insertInto("customEmailRule")
         .values({
           userId: user.id,
-          category: data.name,
+          name: data.name,
           promptContent: data.summary,
           description: data.description,
+          mailLabel: data.mailLabel,
         })
         .executeTakeFirst(),
       logActivity(user.id, "Created a custom email rule", ipAddress),
@@ -57,7 +59,7 @@ export const createCustomRule = validatedActionWithUser(
 );
 
 const testCustomRuleSchema = z.object({
-  label: z.string(),
+  mailLabel: z.string(),
   summary: z.string(),
   emailContent: z.string(),
 });
@@ -79,7 +81,7 @@ export const testCustomRule = validatedAction(
         "Authorization": `Bearer ${jwt}`,
       },
       body: JSON.stringify({
-        mailLabel: data.label,
+        mailLabel: data.mailLabel,
         emailSummary: data.summary,
         emailContent: data.emailContent,
       }),
@@ -112,14 +114,14 @@ export const testCustomRule = validatedAction(
       case "failure":
         return {
           kind: "test_failure",
-          success: `Expected '${data.label}', received '${json.aiResponse}'`,
+          success: `Expected '${data.mailLabel}', received '${json.aiResponse}'`,
         };
     }
   },
 );
 
 const removeCustomRuleSchema = z.object({
-  categoryName: z.string(),
+  ruleId: z.coerce.number(),
 });
 
 export const removeCustomRule = validatedActionWithUser(
@@ -131,7 +133,7 @@ export const removeCustomRule = validatedActionWithUser(
       db
         .deleteFrom("customEmailRule")
         .where("userId", "=", user.id)
-        .where("category", "=", data.categoryName)
+        .where("id", "=", data.ruleId)
         .executeTakeFirst(),
       logActivity(user.id, "Removed a custom email rule", ipAddress),
     ]);

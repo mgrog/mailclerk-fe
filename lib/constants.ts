@@ -28,7 +28,7 @@ export const DEFAULT_EMAIL_RULES = [
   {
     name: "Ads",
     label: "ads",
-    description: "Advertisements, promotions, that kind of thing",
+    description: "Advertisements and promotions",
     color: "#f2c960",
   },
   {
@@ -40,7 +40,7 @@ export const DEFAULT_EMAIL_RULES = [
   {
     name: "Finances",
     label: "finances",
-    description: "Bills, receipts, bank statements",
+    description: "Bills, receipts, and bank statements",
     color: "#0b4f30",
   },
   {
@@ -58,7 +58,7 @@ export const DEFAULT_EMAIL_RULES = [
   {
     name: "Newsletters",
     label: "newsletters",
-    description: "Weekly updates, blog posts, etc.",
+    description: "Weekly updates, blog posts, and digests",
     color: "#0d3472",
   },
   {
@@ -71,7 +71,7 @@ export const DEFAULT_EMAIL_RULES = [
   {
     name: "Orders",
     label: "orders",
-    description: "Order confirmations, shipping updates, etc.",
+    description: "Order confirmations and shipping updates",
     color: "#2da2bb",
   },
   {
@@ -86,7 +86,7 @@ export const DEFAULT_EMAIL_RULES = [
     description: "Job board postings, LinkedIn updates, etc.",
     color: "#ffad46",
   },
-];
+] as const;
 
 export type DefaultRuleName = (typeof DEFAULT_EMAIL_RULE_NAMES)[number];
 
