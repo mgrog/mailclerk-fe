@@ -116,7 +116,7 @@ const config: Config = {
   plugins: [
     require("tailwindcss-react-aria-components"),
     require("tailwindcss-animate"),
-    require("daisyui"),
+    // require("daisyui"),
     plugin(({ matchUtilities }) => {
       matchUtilities({
         "animate-typing": (values) => {
