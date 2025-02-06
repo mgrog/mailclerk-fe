@@ -45,14 +45,9 @@ export function PredefinedRuleCreateForm({
   return (
     <>
       <form className="space-y-4" onSubmit={handleFormSubmit}>
-        <p className="label-text mt-4">
-          The default settings include predefined categories that should fit common email types.
-          These are meant as a starting point, you are free to disable (-) them if they don't meet
-          your needs.
-        </p>
         <p className="label-text">
-          Here you can reenable a predefined rule that you have previously disabled. If you want to
-          create a new rule, use the 'custom' tab.
+          Here you can reactivate a predefined rule that you have previously disabled. If you want
+          to create a new rule, use the 'custom' tab.
         </p>
         <label className="form-control w-full max-w-xs">
           <div className="label">
@@ -72,24 +67,24 @@ export function PredefinedRuleCreateForm({
               <option key={rule.name}>{rule.name}</option>
             ))}
           </select>
-          {selected ? (
-            <span className="label-text mt-4">
-              {getRuleContext(selected as DefaultRule["name"])}
-            </span>
-          ) : null}
+          <span className="label-text mt-4 min-h-16">
+            {selected ? getRuleContext(selected as DefaultRule["name"]) : null}
+          </span>
         </label>
-        {selected ? (
-          <div className="absolute bottom-4 inline-flex items-center gap-2">
-            <Button type="submit" disabled={predefinedAddPending} loading={predefinedAddPending}>
-              Submit
-            </Button>
-            {predefinedAddState.error && (
-              <span className="text-red-500 text-sm py-1 px-1">
-                {predefinedAddState.error || "Something went wrong, please try again"}
-              </span>
-            )}
-          </div>
-        ) : null}
+        <div className="min-h-10">
+          {selected ? (
+            <div className="absolute bottom-4 inline-flex items-center gap-2">
+              <Button type="submit" disabled={predefinedAddPending} loading={predefinedAddPending}>
+                Submit
+              </Button>
+              {predefinedAddState.error && (
+                <span className="text-red-500 text-sm py-1 px-1">
+                  {predefinedAddState.error || "Something went wrong, please try again"}
+                </span>
+              )}
+            </div>
+          ) : null}
+        </div>
       </form>
     </>
   );

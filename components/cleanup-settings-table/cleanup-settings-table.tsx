@@ -18,6 +18,8 @@ import {
 import { SaveIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { applyCleanupSettings } from "@/components/cleanup-settings-table/actions";
+import { isDirty } from "zod";
+import { AnimatePresence, motion } from "framer-motion";
 
 type Setting = Selectable<AutoCleanupSetting>;
 
@@ -27,7 +29,10 @@ interface CleanupSettingsTableProps {
 }
 
 type ReducerState = {
-  [x: string]: Partial<Setting>;
+  isDirty: boolean;
+  rows: {
+    [x: string]: Partial<Setting>;
+  };
 };
 
 type ReducerAction =
@@ -55,18 +60,20 @@ function reducer(state: ReducerState, action: ReducerAction) {
   switch (action.type) {
     case "change_cleanup_action":
       return produce(state, (draft) => {
-        if (!draft[action.payload.category]) {
-          draft[action.payload.category] = {
+        draft.isDirty = true;
+        if (!draft.rows[action.payload.category]) {
+          draft.rows[action.payload.category] = {
             ...DEFAULT_SETTING,
             cleanupAction: action.payload.value,
           };
         } else {
-          draft[action.payload.category].cleanupAction = action.payload.value;
+          draft.rows[action.payload.category].cleanupAction = action.payload.value;
         }
       });
     case "change_days":
       return produce(state, (draft) => {
-        draft[action.payload.category].afterDaysOld = action.payload.value;
+        draft.isDirty = true;
+        draft.rows[action.payload.category].afterDaysOld = action.payload.value;
       });
     default:
       throw new Error("Unknown action type");
@@ -86,7 +93,10 @@ export function CleanupSettingsTable({
   const cleanupSettingsMap = Object.fromEntries(
     autoCleanupSettings.map((setting) => [setting.mailLabel, setting]),
   );
-  const [changes, dispatch] = useReducer(reducer, {}, () => cleanupSettingsMap);
+  const [settings, dispatch] = useReducer(reducer, {}, () => ({
+    isDirty: false,
+    rows: cleanupSettingsMap,
+  }));
 
   const [applySettingsState, applySettingsAction, isPending] = useActionState<
     ActionState,
@@ -95,8 +105,8 @@ export function CleanupSettingsTable({
 
   const handleSubmit = () => {
     const formData = new FormData();
-    for (const [mailLabel, change] of Object.entries(changes)) {
-      formData.append("changes[]", JSON.stringify({ ...change, mailLabel }));
+    for (const [mailLabel, setting] of Object.entries(settings.rows)) {
+      formData.append("changes[]", JSON.stringify({ ...setting, mailLabel }));
     }
 
     console.log("submiting form data", formData);
@@ -110,20 +120,33 @@ export function CleanupSettingsTable({
 
   const thClass = "sticky top-16 bg-white z-10";
   const tdClass = "text-center align-middle border-b border-color-gray-200";
-  console.log("changes", changes);
+  console.log("settings", settings);
   return (
-    <div className="relative space-y-4 px-12 w-full">
-      <div className="sticky top-0 py-4 pl-4 pr-16 flex items-center justify-between bg-white z-10">
+    <div className="relative space-y-4 px-0 md:px-12 w-full">
+      <div className="sticky top-0 py-4 px-4 md:pr-16 h-[32px] flex items-center justify-between bg-white z-10">
         <h1 className="text-lg font-semibold">Auto Cleanup Settings</h1>
-        <Button
-          variant="outline"
-          size="sm"
-          loading={isPending}
-          onClick={handleSubmit}
-          className="flex items-center gap-1"
-        >
-          Apply Changes
-        </Button>
+
+        <AnimatePresence>
+          {settings.isDirty && (
+            <motion.div
+              layout
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.15, ease: "easeOut" }}
+            >
+              <Button
+                variant="outline"
+                size="sm"
+                loading={isPending}
+                onClick={handleSubmit}
+                className="flex items-center gap-1"
+              >
+                Apply Changes
+              </Button>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
       <table className="w-full table border-separate border-spacing-y-1">
         <thead>
@@ -140,7 +163,7 @@ export function CleanupSettingsTable({
               <tr key={label.id}>
                 <td className={tdClass}>
                   <div
-                    className="rounded-lg w-fit px-2 font-gmail text-[12px]"
+                    className="rounded w-fit px-2 font-gmail text-[12px] whitespace-nowrap"
                     style={{
                       backgroundColor: label.color?.backgroundColor,
                       color: label.color?.textColor,
@@ -153,7 +176,7 @@ export function CleanupSettingsTable({
                   <div className="flex justify-center">
                     <Select
                       defaultValue={
-                        changes[category]?.cleanupAction || DEFAULT_SETTING.cleanupAction
+                        settings.rows[category]?.cleanupAction || DEFAULT_SETTING.cleanupAction
                       }
                       onValueChange={(value) => {
                         dispatch({
@@ -165,7 +188,7 @@ export function CleanupSettingsTable({
                         });
                       }}
                     >
-                      <SelectTrigger className="w-[130px]">
+                      <SelectTrigger className="w-[110px] md:w-[130px] text-xs md:text-sm">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -177,10 +200,11 @@ export function CleanupSettingsTable({
                   </div>
                 </td>
                 <td className={tdClass}>
-                  {changes[category] && changes[category].cleanupAction !== "NOTHING" ? (
+                  {settings.rows[category] &&
+                  settings.rows[category].cleanupAction !== "NOTHING" ? (
                     <div className="flex justify-center">
                       <NumberField
-                        value={changes[category].afterDaysOld ?? DEFAULT_SETTING.afterDaysOld}
+                        value={settings.rows[category].afterDaysOld ?? DEFAULT_SETTING.afterDaysOld}
                         onChange={(value) =>
                           dispatch({
                             type: "change_days",

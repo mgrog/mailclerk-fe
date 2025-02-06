@@ -4,6 +4,7 @@ import {
   RemoveRuleActionState,
   RemoveRuleForm,
 } from "@/components/sorting-rule-table/sorting-rule-forms/remove-rule";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -12,9 +13,9 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Drawer, DrawerContent, DrawerDescription, DrawerHeader } from "@/components/ui/drawer";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { CustomRule, DefaultRule } from "@/lib/db/queries/email-rules";
-import { cn } from "@/lib/utils";
-import { ChevronDownIcon, ChevronUpIcon, MinusIcon, PlusIcon } from "@radix-ui/react-icons";
+import { MinusIcon, PlusIcon } from "@radix-ui/react-icons";
 import { AnimatePresence, motion, useIsPresent } from "framer-motion";
 import { useState } from "react";
 import { useMediaQuery } from "usehooks-ts";
@@ -36,6 +37,7 @@ interface SortingRuleTableProps {
 }
 
 export function SortingRuleTable({ rules }: SortingRuleTableProps) {
+  const [selectedTab, setSelectedTab] = useState("predefined");
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [selectedToRemove, setSelectedToRemove] = useState<CustomRule | DefaultRule | null>(null);
   const isMobile = useMediaQuery("(max-width: 767px)");
@@ -51,57 +53,81 @@ export function SortingRuleTable({ rules }: SortingRuleTableProps) {
     }
   };
   const predefinedRuleSet = new Set(rules.default.map((rule) => rule.name));
+  const [dialogTitle, dialogDescription] =
+    selectedTab === "predefined"
+      ? ["Add Predefined Sorting Rule", "Activate a predefined sorting rule."]
+      : ["Add Custom Sorting Rule", "Add a custom sorting rule to your account."];
 
-  const collapseTitleClass =
-    "collapse-title text-sm font-medium ps-8 pe-8 items-center justify-between bg-gray-100";
-  const chevronClass = "w-6 h-6";
   const tableClass = "w-full table border-separate border-spacing-y-1";
-  const collapseContentClass = "collapse-content px-0";
+  const emptyRowsContainerClass = "flex flex-col gap-2 items-center justify-center w-full h-[50vh]";
+
+  const ruleLenDisplay = (length: number) => (length > 0 ? `(${length})` : "");
+
+  const THead = () => (
+    <thead>
+      <tr className="bg-muted">
+        <th className="pl-8 py-2 text-sm">Rule Name</th>
+        <th className="px-4 py-2 text-sm">Description</th>
+        <th className="pr-4 md:pr-1 py-2"></th>
+      </tr>
+    </thead>
+  );
 
   return (
     <>
       <div className="relative space-y-4 w-full">
-        <div tabIndex={0} className="collapse rounded-none">
-          <input type="checkbox" defaultChecked className="peer" />
-          <div className={cn(collapseTitleClass, "hidden peer-checked:flex")}>
-            Default Rules ({rules.default.length}) <ChevronUpIcon className={chevronClass} />
-          </div>
-          <div className={cn(collapseTitleClass, "flex peer-checked:hidden")}>
-            Default Rules ({rules.default.length}) <ChevronDownIcon className={chevronClass} />
-          </div>
-          <div className={collapseContentClass}>
-            <table className={tableClass}>
-              <tbody>
-                <AnimatePresence>
-                  {rules.default.map((rule) => (
-                    <TableRow key={rule.name} rule={rule} removeRule={setSelectedToRemove} />
-                  ))}
-                </AnimatePresence>
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <div tabIndex={1} className="collapse rounded-none">
-          <input type="checkbox" defaultChecked className="peer" />
-          <div className={cn(collapseTitleClass, "hidden peer-checked:flex")}>
-            Custom Rules ({rules.custom.length}) <ChevronUpIcon className={chevronClass} />
-          </div>
-          <div className={cn(collapseTitleClass, "flex peer-checked:hidden")}>
-            Custom Rules ({rules.custom.length}) <ChevronDownIcon className={chevronClass} />
-          </div>
-          <div className={collapseContentClass}>
-            <table className={tableClass}>
-              <tbody>
-                <AnimatePresence>
-                  {rules.custom.map((rule) => (
-                    <TableRow key={rule.id} rule={rule} removeRule={setSelectedToRemove} />
-                  ))}
-                </AnimatePresence>
-              </tbody>
-            </table>
-          </div>
-        </div>
+        <Tabs defaultValue="predefined" onValueChange={setSelectedTab}>
+          <TabsList className="px-4 md:px-0">
+            <TabsTrigger value="predefined" tabIndex={0}>
+              Predefined {ruleLenDisplay(rules.default.length)}
+            </TabsTrigger>
+            <TabsTrigger value="custom" tabIndex={1}>
+              Custom {ruleLenDisplay(rules.custom.length)}
+            </TabsTrigger>
+          </TabsList>
+          <TabsContent className="mt-3" value="predefined">
+            {rules.default.length === 0 ? (
+              <div className={emptyRowsContainerClass}>
+                No active predefined rules found.{" "}
+                <Button variant="link" className="text-black font-bold">
+                  Activate Rules
+                </Button>
+              </div>
+            ) : (
+              <table className={tableClass}>
+                <THead />
+                <tbody>
+                  <AnimatePresence>
+                    {rules.default.map((rule) => (
+                      <TableRow key={rule.name} rule={rule} removeRule={setSelectedToRemove} />
+                    ))}
+                  </AnimatePresence>
+                </tbody>
+              </table>
+            )}
+          </TabsContent>
+          <TabsContent className="mt-3" value="custom">
+            {rules.custom.length === 0 ? (
+              <div className={emptyRowsContainerClass}>
+                No custom rules found.{" "}
+                <Button variant="link" className="text-black font-bold">
+                  Create Custom Rule
+                </Button>
+              </div>
+            ) : (
+              <table className={tableClass}>
+                <THead />
+                <tbody>
+                  <AnimatePresence>
+                    {rules.custom.map((rule) => (
+                      <TableRow key={rule.id} rule={rule} removeRule={setSelectedToRemove} />
+                    ))}
+                  </AnimatePresence>
+                </tbody>
+              </table>
+            )}{" "}
+          </TabsContent>
+        </Tabs>
 
         <div className="fixed bottom-10 right-4 md:right-20 z-30">
           <div className="p-1 rounded-full bg-base-100">
@@ -143,19 +169,18 @@ export function SortingRuleTable({ rules }: SortingRuleTableProps) {
         <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
           <DialogContent desktopOnly>
             <DialogHeader>
-              <DialogTitle>Add Sorting Rule</DialogTitle>
-              <DialogDescription>Add a new sorting rule to your account.</DialogDescription>
+              <DialogTitle>{dialogTitle}</DialogTitle>
+              <DialogDescription>{dialogDescription}</DialogDescription>
             </DialogHeader>
-            <div className="mt-4 min-h-[508px]">
-              <FormTabs
-                customTabContent={<CustomSortingRuleCreateForm onComplete={onActionComplete} />}
-                predefinedTabContent={
-                  <PredefinedRuleCreateForm
-                    activePredefinedRulesSet={predefinedRuleSet}
-                    onComplete={onActionComplete}
-                  />
-                }
-              />
+            <div className="mt-4">
+              {selectedTab === "predefined" ? (
+                <PredefinedRuleCreateForm
+                  activePredefinedRulesSet={predefinedRuleSet}
+                  onComplete={onActionComplete}
+                />
+              ) : selectedTab === "custom" ? (
+                <CustomSortingRuleCreateForm onComplete={onActionComplete} />
+              ) : null}
             </div>
           </DialogContent>
         </Dialog>
@@ -164,19 +189,18 @@ export function SortingRuleTable({ rules }: SortingRuleTableProps) {
         <Drawer open={addDialogOpen} onOpenChange={setAddDialogOpen}>
           <DrawerContent mobileOnly>
             <DrawerHeader>
-              <DialogTitle>Add Sorting Rule</DialogTitle>
-              <DrawerDescription>Add a new sorting rule to your account.</DrawerDescription>
+              <DialogTitle>{dialogTitle}</DialogTitle>
+              <DrawerDescription>{dialogDescription}</DrawerDescription>
             </DrawerHeader>
             <div className="px-6 pb-6">
-              <FormTabs
-                customTabContent={<CustomSortingRuleCreateForm onComplete={onActionComplete} />}
-                predefinedTabContent={
-                  <PredefinedRuleCreateForm
-                    activePredefinedRulesSet={predefinedRuleSet}
-                    onComplete={onActionComplete}
-                  />
-                }
-              />
+              {selectedTab === "predefined" ? (
+                <PredefinedRuleCreateForm
+                  activePredefinedRulesSet={predefinedRuleSet}
+                  onComplete={onActionComplete}
+                />
+              ) : selectedTab === "custom" ? (
+                <CustomSortingRuleCreateForm onComplete={onActionComplete} />
+              ) : null}
             </div>
           </DrawerContent>
         </Drawer>
@@ -194,7 +218,6 @@ function TableRow({
 }) {
   const isPresent = useIsPresent();
   const ruleName = rule.name;
-  const mailLabel = "mailLabel" in rule ? rule.mailLabel : rule.label;
 
   return (
     <motion.tr
@@ -212,13 +235,9 @@ function TableRow({
       }}
       className="bg-white group/row w-full"
     >
-      <td className="pl-8 py-2 border-b group-last/row:border-0 border-gray-200 text-sm font-medium">
-        {ruleName}
-      </td>
-      <td className="px-4 py-2 border-b group-last/row:border-0 border-gray-200 text-sm">
-        {rule.description}
-      </td>
-      <td className="pr-4 md:pr-1 py-2 border-b group-last/row:border-0 border-gray-200">
+      <td className="pl-8 py-2 border-b border-gray-200 text-sm font-medium">{ruleName}</td>
+      <td className="px-4 py-2 border-b border-gray-200 text-sm">{rule.description}</td>
+      <td className="pr-4 md:pr-1 py-2 border-b border-gray-200">
         <div className="flex justify-end">
           <div className="flex items-center justify-center w-8 min-w-8 h-8 md:w-10 md:min-w-10 md:h-10 border border-gray-300 bg-gray-300 group/btn">
             <MinusIcon

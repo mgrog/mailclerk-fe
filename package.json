@@ -63,7 +63,7 @@
   "devDependencies": {
     "@types/pg": "^8.11.10",
     "@types/set-cookie-parser": "^2.4.10",
-    "daisyui": "^4.12.14",
+    "daisyui": "5.0.0-beta.6",
     "kysely-codegen": "^0.17.0"
   }
 }
