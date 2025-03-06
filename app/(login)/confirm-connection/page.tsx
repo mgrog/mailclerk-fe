@@ -1,8 +1,10 @@
 import { checkAccountConnection } from "@/lib/server/check-connection";
-import { cn } from "@/lib/utils";
+import { cn, wait } from "@/lib/utils";
+import ms from "ms";
 
 export default async function ConfirmConnectionPage() {
   const check = await checkAccountConnection();
+  // await wait(ms("5s"));
   let testsPassed = 0;
   let failedChecks = 0;
   if ("result" in check) {
@@ -21,31 +23,30 @@ export default async function ConfirmConnectionPage() {
         break;
     }
   }
+  testsPassed = 1;
 
-  const stepProps = (num: number) => ({
-    "className": cn("step", testsPassed > num ? "step-success" : "step-error", "after:text-white"),
-    "data-content": testsPassed > num ? "✓" : "✕",
+  const stepProps = (index: number) => ({
+    "className": cn(
+      "step !gap-8 font-semibold",
+      testsPassed > index
+        ? "after:!bg-black after:!text-white"
+        : "after:!bg-red-400 after:!text-black",
+      index >= testsPassed && "text-muted-foreground",
+      "after:text-white",
+    ),
+    "data-content": testsPassed > index ? "✓" : "✕",
   });
 
-  return (
-    <div>
-      <ul className="steps steps-vertical">
-        <li className="step">
-          <span className="step-icon">😕</span>
-          Account found
-        </li>
-        <li className="step">Permissions Granted</li>
-        <li className="step">Tests Successful</li>
-      </ul>
-    </div>
-  );
+  // const headerText = testsPassed === 0 ?
+  //   "Account "
 
   return (
-    <div>
-      <ul className="steps steps-vertical">
-        <li {...stepProps(0)}>Account found</li>
+    <div className="flex flex-col items-center gap-8">
+      <h1 className="font-semibold text-2xl">{}</h1>
+      <ul className="steps steps-vertical h-64">
+        <li {...stepProps(0)}>Account Connected</li>
         <li {...stepProps(1)}>Permissions Granted</li>
-        <li {...stepProps(2)}>Tests Successful</li>
+        <li {...stepProps(2)}>Test Successful</li>
       </ul>
     </div>
   );
